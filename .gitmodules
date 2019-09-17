@@ -1,0 +1,3 @@
+[submodule "Tsugumi/Discord-Utils"]
+	path = Tsugumi/Discord-Utils
+	url = https://github.com/Xwilarg/Discord-Utils
