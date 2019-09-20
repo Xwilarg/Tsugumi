@@ -37,6 +37,7 @@ namespace Tsugumi
             client.MessageReceived += HandleCommandAsync;
 
             await commands.AddModuleAsync<CommunicationModule>(null);
+            await commands.AddModuleAsync<FateGOModule>(null);
 
             if (!File.Exists("Keys/token.txt"))
                 throw new FileNotFoundException("Missing token.txt in Keys/");
