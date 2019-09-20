@@ -20,6 +20,7 @@ namespace Tsugumi
 
         public DateTime StartTime { private set; get; }
         public static Program P { private set; get; }
+        public Db.Db BotDb { private set; get; }
 
         private Program()
         {
@@ -30,10 +31,13 @@ namespace Tsugumi
             });
             client.Log += Utils.Log;
             commands.Log += Utils.LogError;
+            BotDb = new Db.Db();
         }
 
         private async Task MainAsync()
         {
+            await BotDb.InitAsync("Tsugumi");
+
             client.MessageReceived += HandleCommandAsync;
 
             await commands.AddModuleAsync<CommunicationModule>(null);
