@@ -13,8 +13,11 @@ namespace Tsugumi
         [Command("Relation", RunMode = RunMode.Async)]
         public async Task Info()
         {
+        }
+
+        public static async Task<List<string>> GetShipList()
+        {
             List<string> characters = new List<string>();
-            string androidVersion, iosVersion;
             using (HttpClient hc = new HttpClient())
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -29,11 +32,21 @@ namespace Tsugumi
                             characters.Add(name);
                     }
                 }
-                html = await hc.GetStringAsync("https://fategrandorder.fandom.com/wiki/Template:Game_Version?action=raw");
-                androidVersion = Regex.Match(html, "\\[https:\\/\\/news\\.fate-go\\.jp\\/2019\\/0919qwer\\/ ([0-9]+\\.[0-9]+\\.[0-9]+)\\]").Groups[1].Value;
-                iosVersion = Regex.Match(html, "\\[https:\\/\\/news\\.fate-go\\.jp\\/2019\\/0919jwnr\\/ ([0-9]+\\.[0-9]+\\.[0-9]+)\\]").Groups[1].Value;
             }
-            await ReplyAsync(characters.Count + " characters found, Android version: " + androidVersion + ", IOS version: " + iosVersion);
+            return characters;
+        }
+
+        // Array of version: [android Version, IOS Version]
+        public static async Task<string[]> GetVersions()
+        {
+            using (HttpClient hc = new HttpClient())
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                string html = await hc.GetStringAsync("https://fategrandorder.fandom.com/wiki/Template:Game_Version?action=raw");
+                string androidVersion = Regex.Match(html, "\\[https:\\/\\/news\\.fate-go\\.jp\\/2019\\/0919qwer\\/ ([0-9]+\\.[0-9]+\\.[0-9]+)\\]").Groups[1].Value;
+                string iosVersion = Regex.Match(html, "\\[https:\\/\\/news\\.fate-go\\.jp\\/2019\\/0919jwnr\\/ ([0-9]+\\.[0-9]+\\.[0-9]+)\\]").Groups[1].Value;
+                return new[] { androidVersion, iosVersion };
+            }
         }
     }
 }
