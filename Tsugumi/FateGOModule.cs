@@ -1,6 +1,7 @@
 ﻿using Discord.Commands;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -15,7 +16,22 @@ namespace Tsugumi
         {
         }
 
-        public static async Task<List<string>> GetShipList()
+        public static async Task<List<string>> GetServantRelations(string servant)
+        {
+            List<string> dialogues = new List<string>();
+            using (HttpClient hc = new HttpClient())
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                string html = await hc.GetStringAsync("https://fategrandorder.fandom.com/wiki/Sub:" + servant + "/Dialogue");
+                foreach (Match m in Regex.Matches(html, "Dialogue [0-9]+").Cast<Match>())
+                {
+
+                }
+            }
+            return dialogues;
+        }
+
+        public static async Task<List<string>> GetServantList()
         {
             List<string> characters = new List<string>();
             using (HttpClient hc = new HttpClient())
