@@ -29,6 +29,13 @@ namespace Tsugumi.Db
             if (!await R.Db(dbName).TableList().Contains("Relations").RunAsync<bool>(conn))
             {
                 R.Db(dbName).TableCreate("Relations").Run(conn);
+                foreach (var elem in await FateGOModule.GetAllServantRelations())
+                {
+                    await R.Db(dbName).Table("Relations").Insert(R.HashMap("id", FateGOModule.GetId(elem.Key))
+                        .With("name", elem.Key)
+                        .With("relations", string.Join(",", elem.Value))
+                        ).RunAsync(conn);
+                }
             }
         }
 
