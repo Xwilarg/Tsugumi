@@ -1,5 +1,6 @@
 ﻿using RethinkDb.Driver;
 using RethinkDb.Driver.Net;
+using System;
 using System.Threading.Tasks;
 
 namespace Tsugumi.Db
@@ -26,17 +27,40 @@ namespace Tsugumi.Db
                     .With("ios", versions[1])
                     ).RunAsync(conn);
             }
-            if (!await R.Db(dbName).TableList().Contains("Relations").RunAsync<bool>(conn))
+            if (!await R.Db(dbName).TableList().Contains("Relation").RunAsync<bool>(conn))
             {
-                R.Db(dbName).TableCreate("Relations").Run(conn);
+                R.Db(dbName).TableCreate("Relation").Run(conn);
                 foreach (var elem in await FateGOModule.GetAllServantRelations())
                 {
-                    await R.Db(dbName).Table("Relations").Insert(R.HashMap("id", FateGOModule.GetId(elem.Key))
+                    await R.Db(dbName).Table("Relation").Insert(R.HashMap("id", FateGOModule.GetId(elem.Key))
                         .With("name", elem.Key)
                         .With("relations", string.Join(",", elem.Value))
                         ).RunAsync(conn);
                 }
             }
+        }
+
+        public async Task UpdateDb()
+        {
+            string[] versions = await FateGOModule.GetVersions();
+            await R.Db(dbName).Table("Version").Update(R.HashMap("id", "1")
+                .With("android", versions[0])
+                .With("ios", versions[1])
+                ).RunAsync(conn);
+            foreach (var elem in await FateGOModule.GetAllServantRelations())
+            {
+                await R.Db(dbName).Table("Relation").Update(R.HashMap("id", FateGOModule.GetId(elem.Key))
+                    .With("name", elem.Key)
+                    .With("relations", string.Join(",", elem.Value))
+                    ).RunAsync(conn);
+            }
+        }
+
+        public async Task<bool> AreVersionSame()
+        {
+            string[] currVersions = await FateGOModule.GetVersions();
+            dynamic versions = await R.Db(dbName).Table("Version").Get("1").RunAsync(conn);
+            return ((string)versions.android == currVersions[0] && (string)versions.ios == currVersions[1]);
         }
 
         private RethinkDB R;

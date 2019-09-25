@@ -3,9 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DiscordUtils;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Tsugumi
@@ -21,6 +19,7 @@ namespace Tsugumi
         public DateTime StartTime { private set; get; }
         public static Program P { private set; get; }
         public Db.Db BotDb { private set; get; }
+        public float ServantUpdate { set; get; } // Counter for updating servant list in db
 
         private Program()
         {
@@ -32,6 +31,7 @@ namespace Tsugumi
             client.Log += Utils.Log;
             commands.Log += Utils.LogError;
             BotDb = new Db.Db();
+            ServantUpdate = 101f;
         }
 
         private async Task MainAsync()

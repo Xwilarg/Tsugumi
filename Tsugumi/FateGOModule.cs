@@ -14,15 +14,34 @@ namespace Tsugumi
         [Command("Relation", RunMode = RunMode.Async)]
         public async Task Info()
         {
+            if (Program.P.ServantUpdate < 100.5f)
+            {
+                await ReplyAsync("The database is currently updating, please retry later...");
+                return;
+            }
+            if (!await Program.P.BotDb.AreVersionSame())
+            {
+                await ReplyAsync("Updating database, please wait... This can take several minutes.");
+                await Program.P.BotDb.UpdateDb();
+            }
         }
 
         public static async Task<Dictionary<string, List<string>>> GetAllServantRelations()
         {
             Dictionary<string, List<string>> res = new Dictionary<string, List<string>>();
+            var allServants = await GetServantList();
+            Console.Write("Getting servants... 0%");
+            Program.P.ServantUpdate = 0f;
+            int i = 0;
             foreach (string s in await GetServantList())
             {
                 res.Add(s, await GetServantRelations(s));
+                i++;
+                Program.P.ServantUpdate = i * 100f / allServants.Count;
+                Console.Write("\rGetting servants... " + Program.P.ServantUpdate.ToString("0.00") + "%");
             }
+            Console.WriteLine();
+            Program.P.ServantUpdate = 101f;
             return res;
         }
 
@@ -50,7 +69,7 @@ namespace Tsugumi
                 string html = hc.GetStringAsync("https://fategrandorder.fandom.com/wiki/Servant_List_by_ID").GetAwaiter().GetResult();
                 foreach (string s in html.Split(new[] { "<tr>" }, StringSplitOptions.None))
                 {
-                    Match match = Regex.Match(s, "<a href=\"\\/wiki\\/([^\"]+)\"[ \\t]+class=\"[^\"]+\"[ \\t]+title=\"[^\"]+\"");
+                    Match match = Regex.Match(s, "<td> <a href=\"\\/wiki\\/([^\"]+)\"[ \\t]+class=\"[^\"]+\"[ \\t]+title=\"[^\"]+\"");
                     if (match.Success)
                     {
                         string name = match.Groups[1].Value;
