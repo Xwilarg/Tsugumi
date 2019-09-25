@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Tsugumi
     public class FateGOModule : ModuleBase
     {
         [Command("Relation", RunMode = RunMode.Async)]
-        public async Task Info()
+        public async Task Info(params string[] args)
         {
             if (Program.P.ServantUpdate < 100.5f)
             {
@@ -23,6 +24,20 @@ namespace Tsugumi
             {
                 await ReplyAsync("Updating database, please wait... This can take several minutes.");
                 await Program.P.BotDb.UpdateDb();
+            }
+            var answer = await Program.P.BotDb.GetRelations(string.Join("", args));
+            if (answer == null)
+            {
+                await ReplyAsync("There is nobody with this name");
+            }
+            else
+            {
+                await ReplyAsync("", false, new EmbedBuilder
+                {
+                    Color = Color.Blue,
+                    Title = answer.Item1,
+                    Description = string.Join(Environment.NewLine, answer.Item2)
+                }.Build());
             }
         }
 

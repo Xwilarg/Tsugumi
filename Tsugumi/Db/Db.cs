@@ -1,6 +1,7 @@
 ﻿using RethinkDb.Driver;
 using RethinkDb.Driver.Net;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Tsugumi.Db
@@ -54,6 +55,17 @@ namespace Tsugumi.Db
                     .With("relations", string.Join(",", elem.Value))
                     ).RunAsync(conn);
             }
+        }
+
+        public async Task<Tuple<string, string[]>> GetRelations(string name)
+        {
+            ulong key = FateGOModule.GetId(name);
+            if (await R.Db(dbName).Table("Relation").GetAll(key).Count().Eq(0).RunAsync<bool>(conn))
+            {
+                return null;
+            }
+            dynamic elem = await R.Db(dbName).Table("Relation").Get(key).RunAsync(conn);
+            return new Tuple<string, string[]>((string)elem.name, ((string)elem.relations).Split(','));
         }
 
         public async Task<bool> AreVersionSame()
