@@ -68,6 +68,25 @@ namespace Tsugumi.Db
             return new Tuple<string, string[]>((string)elem.name, ((string)elem.relations).Split(','));
         }
 
+        public async Task<List<string>> HaveRelationsWith(string name)
+        {
+            ulong key = FateGOModule.GetId(name);
+            List<string> relations = new List<string>();
+            foreach (dynamic elem in await R.Db(dbName).Table("Relation").RunAsync(conn))
+            {
+                foreach (string s in ((string)elem.relations).Split(','))
+                {
+                    if (FateGOModule.GetId(name) == key)
+                    {
+                        Console.WriteLine((ulong)elem.id + ": " + s);
+                        relations.Add(s);
+                        break;
+                    }
+                }
+            }
+            return relations;
+        }
+
         public async Task<bool> AreVersionSame()
         {
             string[] currVersions = await FateGOModule.GetVersions();

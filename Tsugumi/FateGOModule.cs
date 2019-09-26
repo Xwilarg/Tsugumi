@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -25,19 +26,23 @@ namespace Tsugumi
                 await ReplyAsync("Updating database, please wait... This can take several minutes.");
                 await Program.P.BotDb.UpdateDb();
             }
-            var answer = await Program.P.BotDb.GetRelations(string.Join("", args));
+            string name = string.Join("", args);
+            var answer = await Program.P.BotDb.GetRelations(name);
             if (answer == null)
             {
                 await ReplyAsync("There is nobody with this name");
             }
             else
             {
-                await ReplyAsync("", false, new EmbedBuilder
+                EmbedBuilder embed = new EmbedBuilder()
                 {
                     Color = Color.Blue,
-                    Title = answer.Item1,
-                    Description = string.Join(Environment.NewLine, answer.Item2)
-                }.Build());
+                    Title = answer.Item1
+                };
+                embed.AddField("Have dialogues with", string.Join(Environment.NewLine, answer.Item2));
+                Console.WriteLine(string.Join(Environment.NewLine, await Program.P.BotDb.HaveRelationsWith(name)));
+                embed.AddField("Characters that have dialogues with", string.Join(Environment.NewLine, await Program.P.BotDb.HaveRelationsWith(name)));
+                await ReplyAsync("", false, embed.Build());
             }
         }
 
@@ -115,9 +120,11 @@ namespace Tsugumi
         public static ulong GetId(string word)
         {
             ulong id = 0;
+            ulong i = 1;
             foreach (char c in CleanWord(word))
             {
-                id += c;
+                id += c * i;
+                i *= 10;
             }
             return id;
         }
