@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -39,9 +38,8 @@ namespace Tsugumi
                     Color = Color.Blue,
                     Title = answer.Item1
                 };
-                embed.AddField("Have dialogues with", string.Join(Environment.NewLine, answer.Item2));
-                Console.WriteLine(string.Join(Environment.NewLine, await Program.P.BotDb.HaveRelationsWith(name)));
-                embed.AddField("Characters that have dialogues with", string.Join(Environment.NewLine, await Program.P.BotDb.HaveRelationsWith(name)));
+                embed.AddField("Have dialogues with", "`" + string.Join(Environment.NewLine, answer.Item2) + "`");
+                embed.AddField("Characters that have dialogues with", "`" + string.Join(Environment.NewLine, await Program.P.BotDb.HaveRelationsWith(name)) + "`");
                 await ReplyAsync("", false, embed.Build());
             }
         }

@@ -76,10 +76,9 @@ namespace Tsugumi.Db
             {
                 foreach (string s in ((string)elem.relations).Split(','))
                 {
-                    if (FateGOModule.GetId(name) == key)
+                    if (FateGOModule.GetId(s) == key)
                     {
-                        Console.WriteLine((ulong)elem.id + ": " + s);
-                        relations.Add(s);
+                        relations.Add((string)elem.name);
                         break;
                     }
                 }
