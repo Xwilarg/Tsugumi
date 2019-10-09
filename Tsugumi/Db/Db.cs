@@ -2,6 +2,7 @@
 using RethinkDb.Driver.Net;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Tsugumi.Db
@@ -78,7 +79,7 @@ namespace Tsugumi.Db
                 {
                     if (FateGOModule.GetId(s) == key)
                     {
-                        relations.Add((string)elem.name);
+                        relations.Add(WebUtility.UrlDecode((string)elem.name));
                         break;
                     }
                 }

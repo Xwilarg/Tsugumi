@@ -25,7 +25,18 @@ namespace Tsugumi
                 await ReplyAsync("Updating database, please wait... This can take several minutes.");
                 await Program.P.BotDb.UpdateDb();
             }
-            string name = string.Join("", args);
+            string name;
+            using (HttpClient hc = new HttpClient())
+            {
+                string html = await hc.GetStringAsync("https://fategrandorder.fandom.com/wiki/Special:Search?search=" + WebUtility.UrlEncode(string.Join("", args)) + "&limit=1");
+                Match match = Regex.Match(html, "<a href=\"https?:\\/\\/fategrandorder.fandom.com\\/wiki\\/([^\"]+)\" class=\"result-link");
+                if (!match.Success)
+                {
+                    await ReplyAsync("There is nobody with this name");
+                    return;
+                }
+                name = match.Groups[1].Value;
+            }
             var answer = await Program.P.BotDb.GetRelations(name);
             if (answer == null)
             {
@@ -84,16 +95,23 @@ namespace Tsugumi
             using (HttpClient hc = new HttpClient())
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                string html = hc.GetStringAsync("https://fategrandorder.fandom.com/wiki/Servant_List_by_ID").GetAwaiter().GetResult();
-                foreach (string s in html.Split(new[] { "<tr>" }, StringSplitOptions.None))
+                foreach (string servantClass in new[] { "Shielder", "Saber", "Archer", "Lancer", "Rider", "Caster", "Assassin", "Berserker", "Ruler", "Avenger", "Moon_Cancer", "Alter_Ego", "Foreigner" })
                 {
-                    Match match = Regex.Match(s, "<td> <a href=\"\\/wiki\\/([^\"]+)\"[ \\t]+class=\"[^\"]+\"[ \\t]+title=\"[^\"]+\"");
-                    if (match.Success)
+                    string html = hc.GetStringAsync("https://fategrandorder.fandom.com/wiki/" + servantClass).GetAwaiter().GetResult();
+                    html = string.Join("", html.Split(new[] { "article-thumb tnone show-info-icon" }, StringSplitOptions.None).Skip(1));
+                    foreach (string s in html.Split(new[] { "<td>" }, StringSplitOptions.None))
                     {
-                        string name = match.Groups[1].Value;
-                        if (!s.Contains("Unplayable Servants") && !characters.Contains(name))
-                            characters.Add(name);
+                        Match match = Regex.Match(s, "<a href=\"\\/wiki\\/([^\"]+)\"( |\t)*title=\"[^\"]+\">");
+                        if (match.Success && !s.Contains("Unplayable"))
+                        {
+                            string name = match.Groups[1].Value;
+                            if (!characters.Contains(name))
+                            {
+                                characters.Add(name);
+                            }
+                        }
                     }
+
                 }
             }
             return characters;
