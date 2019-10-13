@@ -47,9 +47,9 @@ namespace Tsugumi
                 EmbedBuilder embed = new EmbedBuilder()
                 {
                     Color = Color.Blue,
-                    Title = answer.Item1
+                    Title = WebUtility.UrlDecode(answer.Item1)
                 };
-                embed.AddField("Have dialogues with", "`" + string.Join(Environment.NewLine, answer.Item2) + "`");
+                embed.AddField("Have dialogues with", "`" + WebUtility.UrlDecode(string.Join(Environment.NewLine, answer.Item2) + "`"));
                 embed.AddField("Characters that have dialogues with", "`" + string.Join(Environment.NewLine, await Program.P.BotDb.HaveRelationsWith(name)) + "`");
                 await ReplyAsync("", false, embed.Build());
             }
